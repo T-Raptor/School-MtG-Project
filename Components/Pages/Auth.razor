@@ -1,0 +1,39 @@
+﻿@page "/auth"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using MTG_Project.Services
+@using MTG_Project.Models
+
+@attribute [Authorize]
+
+<PageTitle>Auth</PageTitle>
+
+<h1>You are authenticated</h1>
+
+<AuthorizeView>
+    Hello @context.User.Identity?.Name!
+</AuthorizeView>
+
+<h2>Cards</h2>
+
+<ul class="image-list">
+
+    @foreach (Card card in myCards)
+    {
+        <li>@card.Name</li>
+    }
+
+</ul>
+
+@code {
+    IList<Card> myCards;
+
+    Services services = new Services();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        myCards = services.GetAllCards();
+    }
+}
