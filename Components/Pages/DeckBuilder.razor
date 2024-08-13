@@ -13,6 +13,9 @@
 
 <p>Choose your cards to build a deck.</p>
 
+<input @bind="searchTerm" placeholder="Search cards..." />
+<button @onclick="SearchCards">Search</button>
+
 <h2>Cards</h2>
 
 <ul class="image-list">
@@ -44,14 +47,19 @@
             <button class="card-nav-link" @onclick="PrevPage">Prev</button>
         </li>
     }
-    <li class="card-nav-item">
-        <button class="card-nav-link" @onclick="NextPage">Next</button>
-    </li>
+    @if (hasMoreCards)
+    {
+        <li class="card-nav-item">
+            <button class="card-nav-link" @onclick="NextPage">Next</button>
+        </li>
+    }
 </ul>
 
 @code {
     int pageNumber;
     int pageSize = 20;
+    string searchTerm = string.Empty;
+    bool hasMoreCards = true;
 
     IList<Card> myCards;
 
@@ -66,7 +74,27 @@
 
     void LoadCards()
     {
-        myCards = services.GetAllCards(pageNumber, pageSize);
+        IList<Card> cards;
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            cards = services.GetAllCards(pageNumber, pageSize);
+        }
+        else
+        {
+            cards = services.GetAllCardsWith(searchTerm)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+
+        hasMoreCards = cards.Count == pageSize;
+        myCards = cards;
+    }
+
+    void SearchCards()
+    {
+        pageNumber = 1;
+        LoadCards();
     }
 
     void PrevPage()
