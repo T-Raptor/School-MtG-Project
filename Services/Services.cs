@@ -10,9 +10,13 @@ namespace MTG_Project.Services
 
         public Services() { }
 
-        public IList<Card> GetAllCards()
+        public IList<Card> GetAllCards(int pageNumber, int pageSize)
         {
-            return dbContext.Cards.Take(25).ToList();
+            return dbContext.Cards
+                .OrderBy(c => c.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
         }
 
         public IList<Card> GetAllCardsWith(string letters)

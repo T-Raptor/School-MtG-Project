@@ -1,0 +1,86 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using MTG_Project.Services
+@using MTG_Project.Models
+
+@attribute [Authorize]
+
+<PageTitle>MTG Deck Builder</PageTitle>
+
+<h1>Welcome to the MTG Deck Builder!</h1>
+
+<p>Choose your cards to build a deck.</p>
+
+<h2>Cards</h2>
+
+<ul class="image-list">
+
+    @foreach (Card card in myCards)
+    {
+        <li>
+            <figure class="figure-flex">
+                @if (card.OriginalImageUrl != null)
+                {
+                    <img src="@card.OriginalImageUrl" alt="@card.Name" height="200">
+                }
+                else
+                {
+                    String imageUrl = "https://api.scryfall.com/cards/named?exact=" + card.Name + "&format=image";
+                    <img src="@imageUrl" alt="@card.Name" height="200">
+                }
+                <figcaption>@card.Name</figcaption>
+            </figure>
+        </li>
+    }
+
+</ul>
+
+<ul class="card-nav">
+    @if (pageNumber > 1)
+    {
+        <li class="card-nav-item">
+            <button class="card-nav-link" @onclick="PrevPage">Prev</button>
+        </li>
+    }
+    <li class="card-nav-item">
+        <button class="card-nav-link" @onclick="NextPage">Next</button>
+    </li>
+</ul>
+
+@code {
+    int pageNumber;
+    int pageSize = 20;
+
+    IList<Card> myCards;
+
+    Services services = new Services();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        pageNumber = 1;
+        LoadCards();
+    }
+
+    void LoadCards()
+    {
+        myCards = services.GetAllCards(pageNumber, pageSize);
+    }
+
+    void PrevPage()
+    {
+        if (pageNumber > 1)
+        {
+            pageNumber--;
+            LoadCards();
+        }
+    }
+
+    void NextPage()
+    {
+        pageNumber++;
+        LoadCards();
+    }
+}

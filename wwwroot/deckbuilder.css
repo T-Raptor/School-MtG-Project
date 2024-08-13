@@ -1,0 +1,43 @@
+﻿.image-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    flex-wrap: wrap;
+    justify-content: center;
+    list-style-type: none;
+    padding: 0;
+}
+
+.figure-flex {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    height: 100%;
+}
+
+.figure-flex * {
+    text-align: center;
+}
+
+.card-nav {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+}
+
+.card-nav-item {
+    margin: 0 5px;
+}
+
+.card-nav-link {
+    text-decoration: none;
+    padding: 8px 12px;
+    border: 1px solid #3a0647;
+    color: #3a0647;
+    border-radius: 4px;
+}
+
+    .card-nav-link:hover {
+        background-color: #3a0647;
+        color: white;
+    }
