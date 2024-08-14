@@ -10,18 +10,53 @@ namespace MTG_Project.Services
 
         public Services() { }
 
+        //GetCards(string sortOrder, string cardLetters, string artistLetters, int cardType, int setCode, string rarityCode, int[] colors, bool colorsExact, int pageNumber, int pageSize))
+
         public IList<Card> GetAllCards(int pageNumber, int pageSize)
         {
-            return dbContext.Cards
-                .OrderBy(c => c.Id)
+            IQueryable<Card> query = dbContext.Cards;
+
+            /*
+            query = Util.OrderBySortOrder(query, sortOrder);
+
+            return query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+            */
+
+            query = query.OrderBy(c => c.Id);
+
+            return Util.Paginate(query, pageNumber, pageSize).ToList();
+        }
+
+        public IList<Card> GetAllCardsWith(string letters, int pageNumber, int pageSize)
+        {
+            Console.WriteLine(letters);
+            return dbContext.Cards.Where(x => x.Name.Contains(letters))
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
         }
 
-        public IList<Card> GetAllCardsWith(string letters)
+        public IList<Card> GetAllCardsWithArtist(string artistLetters, int pageNumber, int pageSize)
         {
-            return dbContext.Cards.Where(x => x.Name.Contains(letters)).ToList();
+            Console.WriteLine(artistLetters);
+            return dbContext.Cards.Where(c => c.Artist.FullName.Contains(artistLetters))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+        
+        public IList<Card> GetAllCardsWithAndWithArtist(string cardLetters, string artistLetters, int pageNumber, int pageSize)
+        {
+            Console.WriteLine(cardLetters, artistLetters);
+            return dbContext.Cards
+                .Where(c => c.Artist.FullName.Contains(artistLetters))
+                .Where(c => c.Name.Contains(cardLetters))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
         }
 
         public IQueryable GetCardsByArtist(int idArtist)

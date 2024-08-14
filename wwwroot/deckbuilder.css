@@ -1,11 +1,15 @@
 ﻿.image-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
     flex-wrap: wrap;
     justify-content: center;
     list-style-type: none;
     padding: 0;
 }
+
+    .image-list figure img {
+        width: 185px;
+    }
 
 .figure-flex {
     display: flex;
@@ -41,3 +45,23 @@
         background-color: #3a0647;
         color: white;
     }
+
+.card-nav-page {
+    text-decoration: none;
+    padding: 8px 12px;
+    border: 1px solid #3a0647;
+    color: #3a0647;
+    border-radius: 7px;
+}
+
+.card-search-text {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.label-textbox {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+}

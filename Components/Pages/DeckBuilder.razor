@@ -13,57 +13,80 @@
 
 <p>Choose your cards to build a deck.</p>
 
-<input @bind="searchTerm" placeholder="Search cards..." />
-<button @onclick="SearchCards">Search</button>
+<div class="card-search">
+    <div class="card-search-text">
+        <div class="label-textbox">
+            <label for="cardSearchTerm">Search for cards:</label>
+            <InputText @bind-Value="cardSearchTerm" placeholder="(Optional) Search by cardname..." />
+        </div>
+        <div class="label-textbox">
+            <label for="artistSearchTerm">Search for artist:</label>
+            <InputText @bind-Value="artistSearchTerm" placeholder="(Optional) Search by artist..." />
+        </div>
+        <button @onclick="SearchCards">Search</button>
+    </div>
+    <div class="card-search-filter"></div>
+</div>
 
-<h2>Cards</h2>
+<div class="card-display">
+    <h2>Cards</h2>
 
-<ul class="image-list">
+    <ul class="image-list">
+        @foreach (Card card in myCards)
+        {
+            <li>
+                <figure class="figure-flex">
+                    @if (card.OriginalImageUrl != null)
+                    {
+                        <img src="@card.OriginalImageUrl" alt="@card.Name">
+                    }
+                    else
+                    {
+                        String imageUrl = "https://api.scryfall.com/cards/named?exact=" + card.Name + "&format=image";
+                        <img src="@imageUrl" alt="@card.Name">
+                    }
+                    <figcaption>@card.Name</figcaption>
+                </figure>
+            </li>
+        }   
 
-    @foreach (Card card in myCards)
+    </ul>
+
+    @if (myCards.Count == 0)
     {
-        <li>
-            <figure class="figure-flex">
-                @if (card.OriginalImageUrl != null)
-                {
-                    <img src="@card.OriginalImageUrl" alt="@card.Name" height="200">
-                }
-                else
-                {
-                    String imageUrl = "https://api.scryfall.com/cards/named?exact=" + card.Name + "&format=image";
-                    <img src="@imageUrl" alt="@card.Name" height="200">
-                }
-                <figcaption>@card.Name</figcaption>
-            </figure>
-        </li>
+    <h3>No cards found.</h3>
+    }
+    else {
+        <ul class="card-nav">
+            @if (pageNumber > 1)
+            {
+                <li class="card-nav-item">
+                    <button class="card-nav-link" @onclick="PrevPage">Prev</button>
+                </li>
+            }
+            <li class="card-nav-page">@pageNumber</li>
+            @if (hasMoreCards)
+            {
+                <li class="card-nav-item">
+                    <button class="card-nav-link" @onclick="NextPage">Next</button>
+                </li>
+            }
+        </ul>
     }
 
-</ul>
-
-<ul class="card-nav">
-    @if (pageNumber > 1)
-    {
-        <li class="card-nav-item">
-            <button class="card-nav-link" @onclick="PrevPage">Prev</button>
-        </li>
-    }
-    @if (hasMoreCards)
-    {
-        <li class="card-nav-item">
-            <button class="card-nav-link" @onclick="NextPage">Next</button>
-        </li>
-    }
-</ul>
+</div>
 
 @code {
-    int pageNumber;
-    int pageSize = 20;
-    string searchTerm = string.Empty;
-    bool hasMoreCards = true;
-
     IList<Card> myCards;
 
     Services services = new Services();
+
+    int pageNumber;
+    int pageSize = 16;
+    bool hasMoreCards = true;
+
+    string cardSearchTerm = string.Empty;
+    string artistSearchTerm = string.Empty;
 
     protected override void OnInitialized()
     {
@@ -75,16 +98,26 @@
     void LoadCards()
     {
         IList<Card> cards;
-        if (string.IsNullOrEmpty(searchTerm))
+
+        if (string.IsNullOrEmpty(cardSearchTerm) && string.IsNullOrEmpty(artistSearchTerm))
         {
             cards = services.GetAllCards(pageNumber, pageSize);
+            Console.WriteLine("Getting all cards");
+        }
+        else if (string.IsNullOrEmpty(artistSearchTerm))
+        {
+            cards = services.GetAllCardsWith(cardSearchTerm, pageNumber, pageSize);
+            Console.WriteLine("Getting all cards with cardSearchTerm");
+        }
+        else if (string.IsNullOrEmpty(cardSearchTerm))
+        {
+            cards = services.GetAllCardsWithArtist(artistSearchTerm, pageNumber, pageSize);
+            Console.WriteLine("Getting all cards with artistSearchTerm");
         }
         else
         {
-            cards = services.GetAllCardsWith(searchTerm)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            cards = services.GetAllCardsWithAndWithArtist(cardSearchTerm, artistSearchTerm, pageNumber, pageSize);
+            Console.WriteLine("Getting all cards with cardSearchTerm and artistSearchTerm");
         }
 
         hasMoreCards = cards.Count == pageSize;
