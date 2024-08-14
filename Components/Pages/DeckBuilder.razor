@@ -13,7 +13,7 @@
 
 <p>Choose your cards to build a deck.</p>
 
-<div class="card-search">
+<EditForm Model=cardSearch OnSubmit=SearchCards class="card-search">
     <div class="card-search-text">
         <div class="label-textbox">
             <label for="cardSearchTerm">Search for cards:</label>
@@ -23,10 +23,21 @@
             <label for="artistSearchTerm">Search for artist:</label>
             <InputText @bind-Value="artistSearchTerm" placeholder="(Optional) Search by artist..." />
         </div>
-        <button @onclick="SearchCards">Search</button>
     </div>
-    <div class="card-search-filter"></div>
-</div>
+    <div class="card-search-filter">
+        <p>Filter:</p>
+    </div>
+    <div class="card-search-sort">
+        Sort:
+        <select @bind="sortValue">
+            <option value="Id">Id</option>
+            <option value="Name">Name</option>
+            <option value="Artist">Artist</option>
+            <option value="RarityCodeNavigation">Rarity</option>
+        </select>
+    </div>
+    <input type="submit" @onclick="SearchCards" value="Search"/>
+</EditForm>
 
 <div class="card-display">
     <h2>Cards</h2>
@@ -87,6 +98,9 @@
 
     string cardSearchTerm = string.Empty;
     string artistSearchTerm = string.Empty;
+    string sortValue = "Id";
+
+    CardSearch cardSearch = new CardSearch();
 
     protected override void OnInitialized()
     {
@@ -97,26 +111,28 @@
 
     void LoadCards()
     {
+        Console.WriteLine(sortValue);
+
         IList<Card> cards;
 
         if (string.IsNullOrEmpty(cardSearchTerm) && string.IsNullOrEmpty(artistSearchTerm))
         {
-            cards = services.GetAllCards(pageNumber, pageSize);
+            cards = services.GetAllCards(pageNumber, pageSize, sortValue);
             Console.WriteLine("Getting all cards");
         }
         else if (string.IsNullOrEmpty(artistSearchTerm))
         {
-            cards = services.GetAllCardsWith(cardSearchTerm, pageNumber, pageSize);
+            cards = services.GetAllCardsWith(cardSearchTerm, pageNumber, pageSize, sortValue);
             Console.WriteLine("Getting all cards with cardSearchTerm");
         }
         else if (string.IsNullOrEmpty(cardSearchTerm))
         {
-            cards = services.GetAllCardsWithArtist(artistSearchTerm, pageNumber, pageSize);
+            cards = services.GetAllCardsWithArtist(artistSearchTerm, pageNumber, pageSize, sortValue);
             Console.WriteLine("Getting all cards with artistSearchTerm");
         }
         else
         {
-            cards = services.GetAllCardsWithAndWithArtist(cardSearchTerm, artistSearchTerm, pageNumber, pageSize);
+            cards = services.GetAllCardsWithAndWithArtist(cardSearchTerm, artistSearchTerm, pageNumber, pageSize, sortValue);
             Console.WriteLine("Getting all cards with cardSearchTerm and artistSearchTerm");
         }
 
@@ -143,5 +159,11 @@
     {
         pageNumber++;
         LoadCards();
+    }
+
+    public class CardSearch
+    {
+        public string CardSearchTerm { get; set; }
+        public string ArtistSearchTerm { get; set; }
     }
 }
