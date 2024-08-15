@@ -16,17 +16,12 @@ namespace MTG_Project.Services
                                     string cardLetters,
                                     string artistLetters,
                                     int cardType,
-                                    int setCode = 0,
+                                    string setCode,
                                     string rarityCode = "",
                                     string[] colors = null)
         {
             IQueryable<Card> query = Util.OrderBySortOrder(dbContext.Cards, sortOrder);
 
-            Console.WriteLine("CardLetters null or empty? " + string.IsNullOrEmpty(cardLetters));
-            Console.WriteLine("ArtistLetters null or empty? " + string.IsNullOrEmpty(artistLetters));
-            Console.WriteLine("CardType null? " + (cardType == null));
-            Console.WriteLine("SetCode: " + setCode);
-            Console.WriteLine("SetCode null? " + (setCode == 0));
             Console.WriteLine("RarityCode: " + rarityCode);
             Console.WriteLine("RarityCode null or empty? " + string.IsNullOrEmpty(rarityCode));
             Console.WriteLine("Colors: " + colors);
@@ -48,9 +43,9 @@ namespace MTG_Project.Services
                 query = query.Where(c => c.CardTypes.Any(t => t.TypeId == cardType));
             }
 
-            if (setCode != 0)
+            if (!string.IsNullOrEmpty(setCode))
             {
-                query = query.Where(c => c.SetCode == setCode.ToString());
+                query = query.Where(c => c.SetCode == setCode);
             }
 
             if (!string.IsNullOrEmpty(rarityCode))

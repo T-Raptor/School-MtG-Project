@@ -38,6 +38,17 @@
                 }
             </select>
         </div>
+
+        <div class="card-search-filter-set">
+            <label for="setCode">Set:</label>
+            <select @bind="cardSearch.SetCode">
+                <option selected="selected" value="">All Sets</option>
+                @foreach (Set set in services.GetAllSets())
+                {
+                    <option value="@set.Code">@set.Code - @set.Name</option>
+                }
+            </select>
+        </div>
     </div>
     <div class="card-search-sort">
         Sort:
@@ -125,7 +136,7 @@
         if (cardSearch.CardSearchTerm == null &&
             cardSearch.ArtistSearchTerm == null &&
             cardSearch.CardType == 0 &&
-            cardSearch.SetCode == 0 &&
+            cardSearch.SetCode == null &&
             cardSearch.RarityCode == null &&
             cardSearch.Colors == null)
         {
@@ -133,7 +144,7 @@
         }
         else
         {
-            cards = services.GetCards(sortValue, pageNumber, pageSize, cardSearch.CardSearchTerm, cardSearch.ArtistSearchTerm, cardSearch.CardType);
+            cards = services.GetCards(sortValue, pageNumber, pageSize, cardSearch.CardSearchTerm, cardSearch.ArtistSearchTerm, cardSearch.CardType, cardSearch.SetCode);
         }
 
         hasMoreCards = cards.Count == pageSize;
@@ -166,7 +177,7 @@
         public string CardSearchTerm { get; set; }
         public string ArtistSearchTerm { get; set; }
         public int CardType { get; set; }
-        public int SetCode { get; set; }
+        public string SetCode { get; set; }
         public string RarityCode { get; set; }
         public string[] Colors { get; set; }
     }
