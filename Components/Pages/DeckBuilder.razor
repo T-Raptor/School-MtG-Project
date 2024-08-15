@@ -111,7 +111,7 @@
 
     void LoadCards()
     {
-        Console.WriteLine(sortValue);
+        Console.WriteLine();
 
         IList<Card> cards;
 
@@ -120,20 +120,9 @@
             cards = services.GetAllCards(pageNumber, pageSize, sortValue);
             Console.WriteLine("Getting all cards");
         }
-        else if (string.IsNullOrEmpty(artistSearchTerm))
-        {
-            cards = services.GetAllCardsWith(cardSearchTerm, pageNumber, pageSize, sortValue);
-            Console.WriteLine("Getting all cards with cardSearchTerm");
-        }
-        else if (string.IsNullOrEmpty(cardSearchTerm))
-        {
-            cards = services.GetAllCardsWithArtist(artistSearchTerm, pageNumber, pageSize, sortValue);
-            Console.WriteLine("Getting all cards with artistSearchTerm");
-        }
         else
         {
-            cards = services.GetAllCardsWithAndWithArtist(cardSearchTerm, artistSearchTerm, pageNumber, pageSize, sortValue);
-            Console.WriteLine("Getting all cards with cardSearchTerm and artistSearchTerm");
+            cards = services.GetCards(sortValue, pageNumber, pageSize, cardSearchTerm, artistSearchTerm);
         }
 
         hasMoreCards = cards.Count == pageSize;
