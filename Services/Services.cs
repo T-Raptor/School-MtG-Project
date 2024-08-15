@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MTG_Project.Components.Pages;
 using MTG_Project.Models;
 using Type = MTG_Project.Models.Type;
 
@@ -13,51 +14,45 @@ namespace MTG_Project.Services
         public IList<Card> GetCards(string sortOrder,
                                     int pageNumber,
                                     int pageSize,
-                                    string cardLetters,
-                                    string artistLetters,
-                                    int cardType,
-                                    string setCode,
-                                    string rarityCode = "",
-                                    string[] colors = null)
+                                    DeckBuilder.CardSearch cardSearch)
         {
             IQueryable<Card> query = Util.OrderBySortOrder(dbContext.Cards, sortOrder);
 
-            Console.WriteLine("RarityCode: " + rarityCode);
-            Console.WriteLine("RarityCode null or empty? " + string.IsNullOrEmpty(rarityCode));
-            Console.WriteLine("Colors: " + colors);
-            Console.WriteLine("Colors null? " + (colors == null));
+            Console.WriteLine("RarityCode: " + cardSearch.RarityCode);
+            Console.WriteLine("RarityCode null or empty? " + string.IsNullOrEmpty(cardSearch.RarityCode));
+            Console.WriteLine("Colors: " + cardSearch.Colors);
+            Console.WriteLine("Colors null? " + (cardSearch.Colors == null));
 
-            if (!string.IsNullOrEmpty(cardLetters))
+            if (!string.IsNullOrEmpty(cardSearch.CardSearchTerm))
             {
-                query = query.Where(c => c.Name.Contains(cardLetters));
+                query = query.Where(c => c.Name.Contains(cardSearch.CardSearchTerm));
             }
 
-            if (!string.IsNullOrEmpty(artistLetters))
+            if (!string.IsNullOrEmpty(cardSearch.ArtistSearchTerm))
             {
-                query = query.Where(c => c.Artist.FullName.Contains(artistLetters));
+                query = query.Where(c => c.Artist.FullName.Contains(cardSearch.ArtistSearchTerm));
             }
 
-            if (cardType != 0)
+            if (cardSearch.CardType != 0)
             {
-                Console.WriteLine("CardType: " + cardType);
-                query = query.Where(c => c.CardTypes.Any(t => t.TypeId == cardType));
+                query = query.Where(c => c.CardTypes.Any(t => t.TypeId == cardSearch.CardType));
             }
 
-            if (!string.IsNullOrEmpty(setCode))
+            if (!string.IsNullOrEmpty(cardSearch.SetCode))
             {
-                query = query.Where(c => c.SetCode == setCode);
+                query = query.Where(c => c.SetCode == cardSearch.SetCode);
             }
 
-            if (!string.IsNullOrEmpty(rarityCode))
+            if (!string.IsNullOrEmpty(cardSearch.RarityCode))
             {
-                query = query.Where(c => c.RarityCode == rarityCode);
+                query = query.Where(c => c.RarityCode == cardSearch.RarityCode);
             }
 
-            if (colors != null && colors.Length > 0)
+            if (cardSearch.Colors != null && cardSearch.Colors.Length > 0)
             {
                 query = query.Include(c => c.CardColors)
                              .ThenInclude(cc => cc.Color)
-                             .Where(c => c.CardColors.Any(cc => colors.Contains(cc.Color.Name)));
+                             .Where(c => c.CardColors.Any(cc => cardSearch.Colors.Contains(cc.Color.Name)));
             }
 
             return Util.Paginate(query, pageNumber, pageSize).ToList();

@@ -49,6 +49,17 @@
                 }
             </select>
         </div>
+
+        <div class="card-search-filter-rarity">
+            <label for="rarityCode">Rarity:</label>
+            <select @bind="cardSearch.RarityCode">
+                <option selected="selected" value="">All Rarities</option>
+                @foreach (Rarity rarity in services.GetAllRarities())
+                {
+                    <option value="@rarity.Code">@rarity.Name</option>
+                }
+            </select>
+        </div>
     </div>
     <div class="card-search-sort">
         Sort:
@@ -144,7 +155,7 @@
         }
         else
         {
-            cards = services.GetCards(sortValue, pageNumber, pageSize, cardSearch.CardSearchTerm, cardSearch.ArtistSearchTerm, cardSearch.CardType, cardSearch.SetCode);
+            cards = services.GetCards(sortValue, pageNumber, pageSize, cardSearch);
         }
 
         hasMoreCards = cards.Count == pageSize;
