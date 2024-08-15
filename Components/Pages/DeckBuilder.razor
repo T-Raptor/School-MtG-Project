@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using MTG_Project.Services
 @using MTG_Project.Models
+@using Type = MTG_Project.Models.Type;
 
 @attribute [Authorize]
 
@@ -13,19 +14,30 @@
 
 <p>Choose your cards to build a deck.</p>
 
-<EditForm Model=cardSearch OnSubmit=SearchCards class="card-search">
+<EditForm Model="cardSearch" OnSubmit="SearchCards" class="card-search">
     <div class="card-search-text">
         <div class="label-textbox">
             <label for="cardSearchTerm">Search for cards:</label>
-            <InputText @bind-Value="cardSearchTerm" placeholder="(Optional) Search by cardname..." />
+            <InputText @bind-Value="cardSearch.CardSearchTerm" placeholder="(Optional) Search by cardname..." />
         </div>
         <div class="label-textbox">
             <label for="artistSearchTerm">Search for artist:</label>
-            <InputText @bind-Value="artistSearchTerm" placeholder="(Optional) Search by artist..." />
+            <InputText @bind-Value="cardSearch.ArtistSearchTerm" placeholder="(Optional) Search by artist..." />
         </div>
     </div>
     <div class="card-search-filter">
         <p>Filter:</p>
+        <!-- Type, Set, Rarity, Color -->
+        <div class="card-search-filter-type">
+            <label for="cardType">Type:</label>
+            <select @bind="cardSearch.CardType">
+                <option selected="selected" value="0">All Types</option>
+                @foreach (Type type in services.GetAllTypes())
+                {
+                    <option value="@type.Id">@type.Name (@type.Type1)</option>
+                }
+            </select>
+        </div>
     </div>
     <div class="card-search-sort">
         Sort:
@@ -36,7 +48,7 @@
             <option value="RarityCodeNavigation">Rarity</option>
         </select>
     </div>
-    <input type="submit" @onclick="SearchCards" value="Search"/>
+    <input type="submit" value="Search" />
 </EditForm>
 
 <div class="card-display">
@@ -49,25 +61,25 @@
                 <figure class="figure-flex">
                     @if (card.OriginalImageUrl != null)
                     {
-                        <img src="@card.OriginalImageUrl" alt="@card.Name">
+                        <img src="@card.OriginalImageUrl" alt="@card.Name" />
                     }
                     else
                     {
-                        String imageUrl = "https://api.scryfall.com/cards/named?exact=" + card.Name + "&format=image";
-                        <img src="@imageUrl" alt="@card.Name">
+                        string imageUrl = "https://api.scryfall.com/cards/named?exact=" + card.Name + "&format=image";
+                        <img src="@imageUrl" alt="@card.Name" />
                     }
                     <figcaption>@card.Name</figcaption>
                 </figure>
             </li>
-        }   
-
+        }
     </ul>
 
     @if (myCards.Count == 0)
     {
-    <h3>No cards found.</h3>
+        <h3>No cards found.</h3>
     }
-    else {
+    else
+    {
         <ul class="card-nav">
             @if (pageNumber > 1)
             {
@@ -84,7 +96,6 @@
             }
         </ul>
     }
-
 </div>
 
 @code {
@@ -96,8 +107,6 @@
     int pageSize = 16;
     bool hasMoreCards = true;
 
-    string cardSearchTerm = string.Empty;
-    string artistSearchTerm = string.Empty;
     string sortValue = "Id";
 
     CardSearch cardSearch = new CardSearch();
@@ -111,18 +120,20 @@
 
     void LoadCards()
     {
-        Console.WriteLine();
-
         IList<Card> cards;
 
-        if (string.IsNullOrEmpty(cardSearchTerm) && string.IsNullOrEmpty(artistSearchTerm))
+        if (cardSearch.CardSearchTerm == null &&
+            cardSearch.ArtistSearchTerm == null &&
+            cardSearch.CardType == 0 &&
+            cardSearch.SetCode == 0 &&
+            cardSearch.RarityCode == null &&
+            cardSearch.Colors == null)
         {
             cards = services.GetAllCards(pageNumber, pageSize, sortValue);
-            Console.WriteLine("Getting all cards");
         }
         else
         {
-            cards = services.GetCards(sortValue, pageNumber, pageSize, cardSearchTerm, artistSearchTerm);
+            cards = services.GetCards(sortValue, pageNumber, pageSize, cardSearch.CardSearchTerm, cardSearch.ArtistSearchTerm, cardSearch.CardType);
         }
 
         hasMoreCards = cards.Count == pageSize;
@@ -154,5 +165,9 @@
     {
         public string CardSearchTerm { get; set; }
         public string ArtistSearchTerm { get; set; }
+        public int CardType { get; set; }
+        public int SetCode { get; set; }
+        public string RarityCode { get; set; }
+        public string[] Colors { get; set; }
     }
 }

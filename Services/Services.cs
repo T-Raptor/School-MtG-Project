@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MTG_Project.Models;
-using MTG_Project.ModelsDTO;
+using Type = MTG_Project.Models.Type;
 
 namespace MTG_Project.Services
 {
@@ -15,7 +15,7 @@ namespace MTG_Project.Services
                                     int pageSize,
                                     string cardLetters,
                                     string artistLetters,
-                                    int cardType = 0,
+                                    int cardType,
                                     int setCode = 0,
                                     string rarityCode = "",
                                     string[] colors = null)
@@ -24,7 +24,7 @@ namespace MTG_Project.Services
 
             Console.WriteLine("CardLetters null or empty? " + string.IsNullOrEmpty(cardLetters));
             Console.WriteLine("ArtistLetters null or empty? " + string.IsNullOrEmpty(artistLetters));
-            Console.WriteLine("CardType null? " + (cardType == 0));
+            Console.WriteLine("CardType null? " + (cardType == null));
             Console.WriteLine("SetCode: " + setCode);
             Console.WriteLine("SetCode null? " + (setCode == 0));
             Console.WriteLine("RarityCode: " + rarityCode);
@@ -44,7 +44,8 @@ namespace MTG_Project.Services
 
             if (cardType != 0)
             {
-                query = query.Where(c => c.CardTypes.Any(ct => ct.TypeId == cardType));
+                Console.WriteLine("CardType: " + cardType);
+                query = query.Where(c => c.CardTypes.Any(t => t.TypeId == cardType));
             }
 
             if (setCode != 0)
@@ -72,16 +73,19 @@ namespace MTG_Project.Services
             return Util.Paginate(Util.OrderBySortOrder(dbContext.Cards, sortOrder), pageNumber, pageSize).ToList();
         }
 
-        public IQueryable GetCardsByArtist(int idArtist)
+        public IList<Type> GetAllTypes()
         {
-            return dbContext.Cards.Where(c => c.ArtistId == idArtist);
+            var cardTypeIds = dbContext.CardTypes.Select(ct => ct.TypeId).ToList();
+            return dbContext.Types.Where(t => cardTypeIds.Contains(t.Id)).OrderBy(t => t.Name).ToList();
+        }
+        public IList<Set> GetAllSets()
+        {
+            return dbContext.Sets.OrderBy(s => s.Id).ToList();
         }
 
-        public IList<CardModel> GetAllCardsArtists()
+        public IList<Rarity> GetAllRarities()
         {
-            return dbContext.Cards.Include(c => c.Artist)
-                                  .Select(c => new CardModel(c.Id, c.Image, c.Name, c.Artist.FullName))
-                                  .ToList();
+            return dbContext.Rarities.OrderBy(r => r.Id).ToList();
         }
     }
 
