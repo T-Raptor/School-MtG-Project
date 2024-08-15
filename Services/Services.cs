@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MTG_Project.Components.Pages;
+﻿using MTG_Project.Components.Pages;
 using MTG_Project.Models;
 using Type = MTG_Project.Models.Type;
 

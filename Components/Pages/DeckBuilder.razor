@@ -6,6 +6,8 @@
 @using MTG_Project.Models
 @using Type = MTG_Project.Models.Type;
 
+@inject IJSRuntime JSRuntime
+
 @attribute [Authorize]
 
 <PageTitle>MTG Deck Builder</PageTitle>
@@ -74,13 +76,13 @@
 </EditForm>
 
 <div class="card-display">
-    <h2>Cards</h2>
+    <h2>Card Results</h2>
 
     <ul class="image-list">
         @foreach (Card card in myCards)
         {
             <li>
-                <figure class="figure-flex">
+                <figure class="figure-flex" @onclick="() => SelectCard(card)">
                     @if (card.OriginalImageUrl != null)
                     {
                         <img src="@card.OriginalImageUrl" alt="@card.Name" />
@@ -120,16 +122,54 @@
     }
 </div>
 
+<div class="card-display">
+    <h2>Selected Cards</h2>
+    <ul class="image-list">
+        @foreach (var card in selectedCards)
+        {
+            <li>
+                <figure class="figure-flex" @onclick="() => RemoveCard(card)">
+                    @if (card.OriginalImageUrl != null)
+                    {
+                        <img src="@card.OriginalImageUrl" alt="@card.Name" />
+                    }
+                    else
+                    {
+                        string imageUrl = "https://api.scryfall.com/cards/named?exact=" + card.Name + "&format=image";
+                        <img src="@imageUrl" alt="@card.Name" />
+                    }
+                    <figcaption>@card.Name</figcaption>
+                </figure>    
+            </li>
+        }
+    </ul>
+</div>
+
+<button @onclick="SaveDeck">@deckSaveButton</button>
+
+<script>
+    window.localStorageInterop = {
+        saveDeck: function (deckNumber, cardIds) {
+            localStorage.setItem(`deck ${deckNumber}`, JSON.stringify(cardIds));
+        }
+    };
+</script>
+
+
 @code {
     IList<Card> myCards;
 
     Services services = new Services();
+    IList<Card> selectedCards = new List<Card>();
 
     int pageNumber;
     int pageSize = 16;
     bool hasMoreCards = true;
 
     string sortValue = "Id";
+
+    int deckNumber = 1;
+    string deckSaveButton = "Save deck";
 
     CardSearch cardSearch = new CardSearch();
 
@@ -143,13 +183,6 @@
     void LoadCards()
     {
         IList<Card> cards;
-
-        Console.WriteLine("CardSearchTerm: " + cardSearch.CardSearchTerm);
-        Console.WriteLine("ArtistSearchTerm: " + cardSearch.ArtistSearchTerm);
-        Console.WriteLine("CardType: " + cardSearch.CardType);
-        Console.WriteLine("SetCode: " + cardSearch.SetCode);
-        Console.WriteLine("RarityCode: " + cardSearch.RarityCode);
-
         if (cardSearch.CardSearchTerm == null &&
             cardSearch.ArtistSearchTerm == null &&
             cardSearch.CardType == 0 &&
@@ -186,6 +219,29 @@
     {
         pageNumber++;
         LoadCards();
+    }
+
+    void SelectCard(Card card)
+    {
+        deckSaveButton = "Save deck";
+        selectedCards.Add(card);
+    }
+
+    void RemoveCard(Card card)
+    {
+        deckSaveButton = "Save deck";
+        selectedCards.Remove(card);
+    }
+
+    async Task SaveDeck()
+    {
+        var cardIds = selectedCards.Select(c => c.Id).ToArray();
+
+        await JSRuntime.InvokeVoidAsync("localStorageInterop.saveDeck", deckNumber, cardIds);
+
+        deckSaveButton = "Deck saved";
+
+        deckNumber++;
     }
 
     public class CardSearch

@@ -1,0 +1,60 @@
+﻿@page "/deck-viewer"
+@rendermode InteractiveServer
+
+@using MTG_Project.Models
+
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Deck Viewer</PageTitle>
+
+<h1>Deck Viewer</h1>
+
+<p>View all your decks here</p>
+
+<div class="card-display">
+    <h2>Your Saved Decks</h2>
+    <h3>Deck 1</h3>
+    <ul class="image-list">
+        @foreach (Card card in myCards)
+        {
+            <li>
+                <figure class="figure-flex">
+                    @if (card.OriginalImageUrl != null)
+                    {
+                        <img src="@card.OriginalImageUrl" alt="@card.Name" />
+                    }
+                    else
+                    {
+                        string imageUrl = "https://api.scryfall.com/cards/named?exact=" + card.Name + "&format=image";
+                        <img src="@imageUrl" alt="@card.Name" />
+                    }
+                    <figcaption>@card.Name</figcaption>
+                </figure>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    IList<Card> myCards;
+    MyDBContext dbContext = new();
+
+    public class Deck
+    {
+        public string Title { get; set; }
+        public List<int> CardIds { get; set; }
+    }
+
+    private List<Deck> savedDecks = new List<Deck>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        LoadCards();
+    }
+
+    void LoadCards()
+    {
+        myCards = dbContext.Cards.Where(c => c.Id == 1 || c.Id == 2 || c.Id == 3 || c.Id == 4).ToList();
+    }
+}
