@@ -17,19 +17,19 @@
 <EditForm Model="cardSearch" OnSubmit="SearchCards" class="card-search">
     <div class="card-search-text">
         <div class="label-textbox">
-            <label for="cardSearchTerm">Search for cards:</label>
+            <label for="cardSearch.CardSearchTerm">Search for cards:</label>
             <InputText @bind-Value="cardSearch.CardSearchTerm" placeholder="(Optional) Search by cardname..." />
         </div>
         <div class="label-textbox">
-            <label for="artistSearchTerm">Search for artist:</label>
+            <label for="cardSearch.ArtistSearchTerm">Search for artist:</label>
             <InputText @bind-Value="cardSearch.ArtistSearchTerm" placeholder="(Optional) Search by artist..." />
         </div>
     </div>
-    <div class="card-search-filter">
-        <p>Filter:</p>
-        <!-- Type, Set, Rarity, Color -->
+
+    Filter:
+    <div id="card-search-filter">
         <div class="card-search-filter-type">
-            <label for="cardType">Type:</label>
+            <label for="cardSearch.CardType">Type:</label>
             <select @bind="cardSearch.CardType">
                 <option selected="selected" value="0">All Types</option>
                 @foreach (Type type in services.GetAllTypes())
@@ -40,7 +40,7 @@
         </div>
 
         <div class="card-search-filter-set">
-            <label for="setCode">Set:</label>
+            <label for="cardSearch.SetCode">Set:</label>
             <select @bind="cardSearch.SetCode">
                 <option selected="selected" value="">All Sets</option>
                 @foreach (Set set in services.GetAllSets())
@@ -51,7 +51,7 @@
         </div>
 
         <div class="card-search-filter-rarity">
-            <label for="rarityCode">Rarity:</label>
+            <label for="cardSearch.rarityCode">Rarity:</label>
             <select @bind="cardSearch.RarityCode">
                 <option selected="selected" value="">All Rarities</option>
                 @foreach (Rarity rarity in services.GetAllRarities())
@@ -144,12 +144,17 @@
     {
         IList<Card> cards;
 
+        Console.WriteLine("CardSearchTerm: " + cardSearch.CardSearchTerm);
+        Console.WriteLine("ArtistSearchTerm: " + cardSearch.ArtistSearchTerm);
+        Console.WriteLine("CardType: " + cardSearch.CardType);
+        Console.WriteLine("SetCode: " + cardSearch.SetCode);
+        Console.WriteLine("RarityCode: " + cardSearch.RarityCode);
+
         if (cardSearch.CardSearchTerm == null &&
             cardSearch.ArtistSearchTerm == null &&
             cardSearch.CardType == 0 &&
             cardSearch.SetCode == null &&
-            cardSearch.RarityCode == null &&
-            cardSearch.Colors == null)
+            cardSearch.RarityCode == null)
         {
             cards = services.GetAllCards(pageNumber, pageSize, sortValue);
         }
@@ -190,6 +195,5 @@
         public int CardType { get; set; }
         public string SetCode { get; set; }
         public string RarityCode { get; set; }
-        public string[] Colors { get; set; }
     }
 }

@@ -18,11 +18,6 @@ namespace MTG_Project.Services
         {
             IQueryable<Card> query = Util.OrderBySortOrder(dbContext.Cards, sortOrder);
 
-            Console.WriteLine("RarityCode: " + cardSearch.RarityCode);
-            Console.WriteLine("RarityCode null or empty? " + string.IsNullOrEmpty(cardSearch.RarityCode));
-            Console.WriteLine("Colors: " + cardSearch.Colors);
-            Console.WriteLine("Colors null? " + (cardSearch.Colors == null));
-
             if (!string.IsNullOrEmpty(cardSearch.CardSearchTerm))
             {
                 query = query.Where(c => c.Name.Contains(cardSearch.CardSearchTerm));
@@ -48,13 +43,6 @@ namespace MTG_Project.Services
                 query = query.Where(c => c.RarityCode == cardSearch.RarityCode);
             }
 
-            if (cardSearch.Colors != null && cardSearch.Colors.Length > 0)
-            {
-                query = query.Include(c => c.CardColors)
-                             .ThenInclude(cc => cc.Color)
-                             .Where(c => c.CardColors.Any(cc => cardSearch.Colors.Contains(cc.Color.Name)));
-            }
-
             return Util.Paginate(query, pageNumber, pageSize).ToList();
         }
 
@@ -78,5 +66,4 @@ namespace MTG_Project.Services
             return dbContext.Rarities.OrderBy(r => r.Id).ToList();
         }
     }
-
 }
